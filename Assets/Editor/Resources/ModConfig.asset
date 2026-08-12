@@ -11,21 +11,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 615501dbe4f3fe94fbf4b564abb10237, type: 3}
   m_Name: ModConfig
   m_EditorClassIdentifier: 
-  id: voidTraversal
-  title: Void Traversal
+  id: abnormalityChoice
+  title: Abnormality Choice
   author: MaddyMoos
-  description: 'Traverse inside The Void, because your defuser made a poor bet, and
-    now Void wants to see them get extremely confused.
+  description: 'Select the next Abnormality to go into L Corp''s facility.
 
 
-    I think Void was a little upset her *own module* barely used her "Special Gimmick."
+    idk
 
 
-    Module ID: voidTraversal
+    Module ID: abnoChoice
 
 
     Manual on: ktane.timwi.de/HTML/Void%20Traversal.html'
-  version: 1.2
+  version: 1.0
   outputFolder: C:\Program Files (x86)\Steam\steamapps\common\Keep Talking and Nobody
     Explodes\mods
   debugBuild: 1

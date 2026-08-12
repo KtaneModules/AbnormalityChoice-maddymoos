@@ -1,0 +1,10 @@
+{
+  "name": "abnormalityChoice-Editor",
+  "references": [
+    "abnormalityChoice"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": []
+}
