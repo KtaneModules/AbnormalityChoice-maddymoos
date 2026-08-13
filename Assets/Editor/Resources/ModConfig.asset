@@ -14,18 +14,11 @@ MonoBehaviour:
   id: abnormalityChoice
   title: Abnormality Choice
   author: MaddyMoos
-  description: 'Select the next Abnormality to go into L Corp''s facility.
-
-
-    idk
-
-
-    Module ID: abnoChoice
-
-
-    Manual on: ktane.timwi.de/HTML/Void%20Traversal.html'
-  version: 1.0
+  description: "Select the next Abnormality to go into L Corp's facility.\n\nWant
+    amputated? Bones melt. Flesh explode? Won\u2019t die.\n\nModule ID: abnoChoice\n\nManual
+    on: ktane.timwi.de/HTML/Abnormality%20Choice.html"
+  version: 1.0.1
   outputFolder: C:\Program Files (x86)\Steam\steamapps\common\Keep Talking and Nobody
     Explodes\mods
   debugBuild: 1
-  previewImage: {fileID: 2800000, guid: 7443a3506f3b30d4cbc923f9fd97e557, type: 3}
+  previewImage: {fileID: 2800000, guid: 0ca7a3e438f7f8a42981eef8a73d5a97, type: 3}

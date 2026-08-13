@@ -5,7 +5,6 @@ using System.Collections;
 using System.Collections.Generic;
 
 using System.Linq;
-
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.UI;
@@ -68,6 +67,8 @@ public class abnochoice : MonoBehaviour {
     private int[] abnonums = new int[3];
     private float[] abnoscore = new float[3];
 
+    private bool[] playsound = { true, true, true };
+
     static private string[] HazardOrder = { "Zayin", "Teth", "He", "Waw", "Aleph" };
     static private string[] ColorOrder = { "RED", "WHITE", "BLACK", "PALE" };
     static private string[] Ordianals = { "first", "second", "third" };
@@ -84,7 +85,9 @@ public class abnochoice : MonoBehaviour {
         new int[] {0,2,4,5,2 },
         new int[] {0,1,3,4,3 },
         new int[] {0,0,2,3,4 },
-        new int[] {0,0,1,2,5 }
+        new int[] {0,0,1,2,5 },
+        new int[] {1,1,1,1,5 },
+        new int[] {3,3,3,3,3 }
     };
 
     private int[][] DefWeights = new int[][]
@@ -111,9 +114,13 @@ public class abnochoice : MonoBehaviour {
                 }
                 if (!animating)
                 {
-                    Audio.PlaySoundAtTransform("DoorOn", AbnormalityBoxes[k].transform);
+                    if (playsound[k])
+                    {
+                        Audio.PlaySoundAtTransform("DoorOn", AbnormalityBoxes[k].transform);
+                        StartCoroutine(SoundDelay(k));
+                    }
                 AbnoBoxesRenderer[k].sprite = AbnoBoxesTex[1];
-                AbnoBoxesRenderer[k].sortingOrder = -1;
+                AbnoBoxesRenderer[k].sortingOrder = -2;
                 
                     biggify[k] = true;
                     dark = true;
@@ -132,7 +139,7 @@ public class abnochoice : MonoBehaviour {
                 if (!animating)
                 {
                     AbnoBoxesRenderer[k].sprite = AbnoBoxesTex[0];
-                    AbnoBoxesRenderer[k].sortingOrder = -3;
+                    AbnoBoxesRenderer[k].sortingOrder = -4;
                     biggify[k] = false;
                     dark = false;
                 }
@@ -167,24 +174,6 @@ public class abnochoice : MonoBehaviour {
     // Use this for initialization
     void Start () {
         fadeinFilter.color = new Color(0, 0, 0, 1);
-        for (int i = 0;i<3;i++)
-        {
-            boxSway[i] = Rnd.Range(0, 100) / 100f;
-            if (Rnd.Range(0, 2) == 0) boxDir[i] = true;
-        }
-        GenerateStats();
-        GenerateAbnos();
-        if (!Application.isEditor)
-        {
-            return;
-        }
-        int[] type = new int[5];
-        foreach(Abnormality ay in AbnoList)
-        {
-            type[Array.IndexOf(HazardOrder, ay.Class)]++;
-        }
-        Debug.LogFormat("{0} {1} {2} {3} {4}", type[0], type[1], type[2], type[3], type[4]);
-
     }
 
     void CheckAnswer(int j)
@@ -251,7 +240,7 @@ public class abnochoice : MonoBehaviour {
         Debug.LogFormat("[Abnormality Choice #{0}]: It's time to choose a new Abnormality, Manager.", moduleId);
         do
         {
-            daynum = Rnd.Range(2, 40);
+            daynum = Rnd.Range(2, 50);
             DayNum.text = "Day " + daynum;
         }
         while (daynum % 5 == 0);
@@ -261,20 +250,30 @@ public class abnochoice : MonoBehaviour {
             stats[i].GetComponent<MeshRenderer>().enabled = true;
             stats[i+4].GetComponent<MeshRenderer>().enabled = true;
 
-            if (daynum > 30)
+            if (daynum > 40)
+            {
+                defStats[i] = Rnd.Range(3, 6);
+                workStats[i] = Rnd.Range(3, 5);
+            }
+            else if (daynum > 30)
             {
                 defStats[i] = Rnd.Range(2, 6);
                 workStats[i] = Rnd.Range(2, 5);
             }
-            else if (daynum > 13)
+            else if (daynum > 20)
             {
-                defStats[i] = Rnd.Range(0, 6);
-                workStats[i] = Rnd.Range(0, 5);
+                defStats[i] = Rnd.Range(1, i == 4 ? 6 : 5);
+                workStats[i] = Rnd.Range(1, i == 4 ? 5 : 4);
+            }
+            else if (daynum > 10)
+            {
+                defStats[i] = Rnd.Range(0, i == 4 ? 5 : 3);
+                workStats[i] = Rnd.Range(0, i == 4 ? 4 : 3);
             }
             else
             {
-                defStats[i] = Rnd.Range(0, 4);
-                workStats[i] = Rnd.Range(0, 3);
+                defStats[i] = Rnd.Range(0, i == 4 ? 3 : 2);
+                workStats[i] = Rnd.Range(0, i == 4 ? 2 : 1);
             }
                 stats[i].localScale = Vector3.Lerp(new Vector3(0, 1, .825f), new Vector3(.95f, 1, .825f), (float)defStats[i] / 5);
             stats[i].localPosition = Vector3.Lerp(new Vector3(-.475f, .06f, 0), new Vector3(0, .06f, 0), (float)defStats[i] / 5);
@@ -320,12 +319,10 @@ public class abnochoice : MonoBehaviour {
                 //Day Bias
                 abnoscore[i] += DayWeights[daynum / 5][Array.IndexOf(HazardOrder, AbnoList[abnonums[i]].Class)];
 
-                Debug.Log(abnoscore[i]);
                 //Damage Bias
                 abnoscore[i] += DefWeights[Array.IndexOf(HazardOrder, AbnoList[abnonums[i]].Class)]
                     [defStats[Array.IndexOf(ColorOrder, AbnoList[abnonums[i]].dmgColor)]];
 
-                Debug.Log(abnoscore[i]);
                 //WorkSkill
 
                 abnoscore[i] = abnoscore[i] * AbnoList[abnonums[i]].workMult[workStats[Array.IndexOf(ColorOrder, AbnoList[abnonums[i]].perfWork)]];
@@ -344,11 +341,17 @@ public class abnochoice : MonoBehaviour {
     void GetAbnoList()
     {
         AbnoList = JsonConvert.DeserializeObject<List<Abnormality>>(abnoList.text);
-        Debug.Log(AbnoList[0].Name);
     }
 
     IEnumerator FadeIn()
     {
+        for (int j = 0; j < 3; j++)
+        {
+            boxSway[j] = Rnd.Range(0, 100) / 100f;
+            if (Rnd.Range(0, 2) == 0) boxDir[j] = true;
+        }
+        GenerateStats();
+        GenerateAbnos();
         float i = 0;
         fadeinFilter.color = Color.Lerp(new Color(0, 0, 0, 1), new Color(0, 0, 0, 0), i);
         while(i<1)
@@ -463,22 +466,37 @@ public class abnochoice : MonoBehaviour {
         }
     }
 
+    IEnumerator SoundDelay(int j)
+    {
+        playsound[j] = false;
+        yield return new WaitForSeconds(.35f);
+        playsound[j] = true;
+    }
+
     float easeInOutCubic(float x) {
     return x< 0.5 ? 4 * x* x* x : 1 - (float)Math.Pow(-2 * x + 2, (double)3) / 2;
     }
 
 #pragma warning disable 414
-    private readonly string TwitchHelpMessage = @"!{0} cycle (cycles across the Abnormalities) / !{0} left/middle/right (selects the left/middle/right Abnormality)";
+    private readonly string TwitchHelpMessage = @"!{0} activate (Activates the module) / !{0} cycle (cycles across the Abnormalities) / !{0} left/middle/right (selects the left/middle/right Abnormality)";
 #pragma warning restore 414
     IEnumerator ProcessTwitchCommand(string command)
     {
         Match m;
-        if ((m = Regex.Match(command, @"^\s*((cycle)|(left)|(middle)|(right))$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)).Success)
+        if ((m = Regex.Match(command, @"^\s*((activate)|(cycle)|(left)|(middle)|(right))$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)).Success)
         {
             yield return null;
             var input = m.Groups[1].Value.ToLowerInvariant();
+            if(input != "activate" && fadeinFilter.enabled)
+            {
+                yield return "sendtochaterror The module is not yet activated. Please activate it first.";
+                yield break;
+            }
             switch (input)
             {
+                case "activate":
+                    ModSelectable.OnFocus();
+                    break;
                 case "cycle":
                     for (int i = 0; i < 3; i++)
                     {
@@ -491,7 +509,7 @@ public class abnochoice : MonoBehaviour {
                 case "left":
                     AbnormalityBoxes[0].OnInteract();
                     break;
-                    case "right":
+                case "right":
                     AbnormalityBoxes[2].OnInteract();
                     break;
                 case "middle":
